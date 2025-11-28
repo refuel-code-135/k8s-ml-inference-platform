@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: envoy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: envoy
+  template:
+    metadata:
+      labels:
+        app: envoy
+    spec:
+      containers:
+        - name: envoy
+          image: envoyproxy/envoy:v1.30-latest
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: envoy-config
+              mountPath: /etc/envoy/envoy.yaml
+              subPath: envoy.yaml
+
+            - name: descriptor
+              mountPath: /etc/envoy/inference_descriptor.pb
+              subPath: inference_descriptor.pb
+
+      volumes:
+        - name: envoy-config
+          configMap:
+            name: envoy-config
+
+        # ★ 修正：ConfigMap -> Secret
+        - name: descriptor
+          secret:
+            secretName: envoy-descriptor
+
