@@ -1,4 +1,3 @@
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -16,6 +15,7 @@ spec:
       containers:
         - name: grpc-server
           image: grpc-server:latest
+          imagePullPolicy: Never
           ports:
             - containerPort: 50051
 

@@ -64,4 +64,3 @@ data:
                           address: grpc-server.default.svc.cluster.local
                           port_value: 50051
           http2_protocol_options: {}
-
