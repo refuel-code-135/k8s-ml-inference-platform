@@ -12,6 +12,7 @@ static_resources:
                 "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
                 stat_prefix: ingress_http
                 codec_type: auto
+
                 route_config:
                   name: local_route
                   virtual_hosts:
@@ -19,11 +20,27 @@ static_resources:
                       domains: ["*"]
                       routes:
                         - match:
-                            prefix: "/inference.v1.InferenceService/Infer"
+                            prefix: "/"
                           route:
                             cluster: inference_grpc
 
                 http_filters:
+                  # HTTP1 → gRPC
+                  - name: envoy.filters.http.grpc_http1_bridge
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.filters.http.grpc_http1_bridge.v3.Config
+
+                  # JSON ⇄ gRPC
+                  - name: envoy.filters.http.grpc_json_transcoder
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.filters.http.grpc_json_transcoder.v3.GrpcJsonTranscoder
+                      proto_descriptor: "/etc/envoy/inference_descriptor.pb"
+                      services: ["inference.v1.InferenceService"]
+                      print_options:
+                        always_print_primitive_fields: true
+                        preserve_proto_field_names: true
+
+                  # Router（必ず最後）
                   - name: envoy.filters.http.router
                     typed_config:
                       "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
