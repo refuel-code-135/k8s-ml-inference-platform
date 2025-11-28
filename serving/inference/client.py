@@ -1,6 +1,6 @@
 import grpc
-from serving.api.gen.python import inference_pb2
-from serving.api.gen.python import inference_pb2_grpc
+from serving.api.gen import inference_pb2
+from serving.api.gen import inference_pb2_grpc
 
 
 def main():
