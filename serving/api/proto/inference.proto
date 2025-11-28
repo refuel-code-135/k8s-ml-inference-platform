@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package inference.v1;
+
+option go_package = "github.com/yourname/k8s-ml-inference-platform/gen/go/inference/v1";
+option java_multiple_files = true;
+
+// 推論リクエスト
+message InferRequest {
+  string text = 1;
+}
+
+// 推論レスポンス
+message InferResponse {
+  string result = 1;
+}
+
+// 推論サービス
+service InferenceService {
+  rpc Infer(InferRequest) returns (InferResponse);
+}
+
