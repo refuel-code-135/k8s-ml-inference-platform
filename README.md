@@ -16,7 +16,7 @@ sequenceDiagram
     Client->>Ingress: HTTP POST /v1/infer (JSON)
     Ingress->>EnvoySvc: HTTP request
     EnvoySvc->>Envoy: Forward to Envoy Pod
-    Envoy->>Envoy: JSON → gRPC transcoding
+    Envoy->>Envoy: JSON --> gRPC transcoding
     Envoy->>GrpcSvc: gRPC request
     GrpcSvc->>Grpc: Forward to server pod
     Grpc-->>Envoy: gRPC response
