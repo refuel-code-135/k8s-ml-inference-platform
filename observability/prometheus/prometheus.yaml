@@ -9,12 +9,13 @@ data:
       scrape_interval: 10s
 
     scrape_configs:
-      # Scrape Prometheus itself
+
+      # Prometheus itself
       - job_name: 'prometheus'
         static_configs:
           - targets: ['localhost:9090']
 
-      # Scrape K8s node metrics (kubelet)
+      # Kubelet / node metrics
       - job_name: 'kubelet'
         scheme: https
         tls_config:
@@ -22,3 +23,8 @@ data:
         kubernetes_sd_configs:
           - role: node
 
+      # Envoy (API Gateway)
+      - job_name: 'envoy'
+        metrics_path: /stats/prometheus
+        static_configs:
+          - targets: ['envoy.default.svc.cluster.local:9901']

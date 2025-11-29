@@ -42,3 +42,8 @@ colima start --arch aarch64
 sh scripts/restart.sh
 ```
 
+## Monitoring
+
+Prometheus
+
+http://localhost:30090/

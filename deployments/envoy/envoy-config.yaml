@@ -64,3 +64,11 @@ data:
                           address: grpc-server.default.svc.cluster.local
                           port_value: 50051
           http2_protocol_options: {}
+
+    admin:
+      access_log_path: /dev/null
+      address:
+        socket_address:
+          address: 0.0.0.0
+          port_value: 9901
+
