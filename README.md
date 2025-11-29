@@ -10,8 +10,8 @@ sequenceDiagram
     participant Ingress as ingress-nginx
     participant EnvoySvc as Service: envoy
     participant Envoy as Envoy Proxy
-    participant GrpcSvc as Service: grpc-server
-    participant Grpc as Python gRPC Server
+    participant GrpcSvc as Service: gRPC-server
+    participant Grpc as Python gRPC-server
 
     Client->>Ingress: HTTP POST /v1/infer (JSON)
     Ingress->>EnvoySvc: HTTP request
