@@ -7,7 +7,7 @@ sequenceDiagram
     autonumber
 
     participant Client as REST Client (curl)
-    participant Ingress as Ingress (nginx)
+    participant Ingress as ingress-nginx
     participant EnvoySvc as Service: envoy
     participant Envoy as Envoy Proxy
     participant GrpcSvc as Service: grpc-server
@@ -36,6 +36,8 @@ brew install kubectl     # Kubernetes CLI
 ## SetUp
 
 ```
+colima start --arch aarch64
+
 # create cluster if not exists ( idempotent )
 sh scripts/restart.sh
 ```
