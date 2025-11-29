@@ -20,7 +20,8 @@ kubectl wait --namespace ingress-nginx \
   --timeout=180s
 
 echo "=== Building Docker images (only gRPC server) ==="
-docker build -t grpc-server:latest -f docker/grpc-server.Dockerfile .
+docker build --no-cache -t grpc-server:latest -f docker/grpc-server.Dockerfile .
+
 
 echo "=== Loading gRPC server image into Kind nodes ==="
 kind load docker-image grpc-server:latest --name "${CLUSTER_NAME}"

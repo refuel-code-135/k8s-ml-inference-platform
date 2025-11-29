@@ -37,6 +37,6 @@ brew install kubectl     # Kubernetes CLI
 
 ```
 # create cluster if not exists ( idempotent )
-sh restart.sh
+sh scripts/restart.sh
 ```
 
