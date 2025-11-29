@@ -30,9 +30,15 @@ else
   kubectl get svc
 fi
 
-echo
-echo "=== Sending inference request ==="
-curl -X POST http://localhost:30080/v1/infer \
+#echo
+#echo "=== Sending inference request via NodePort ==="
+#curl -X POST http://localhost:30080/v1/infer \
+#  -H "Content-Type: application/json" \
+#  -d '{"text":"hello envoy"}'
+#echo
+
+echo "=== Sending inference request via Ingress ==="
+curl -X POST http://localhost/v1/infer \
   -H "Content-Type: application/json" \
   -d '{"text":"hello envoy"}'
 echo

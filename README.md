@@ -28,3 +28,17 @@ REST → FastAPI（uvicorn）→ Envoy（gRPC）→ Inference Server
 REST → Envoy → FastAPI（gRPC Client）→ gRPC Inference Server
 gRPC client → (直接) gRPC Inference Server（Envoy無し）
 REST → gunicorn + UvicornWorker（FastAPI）→ Python Inference
+
+
+curl http://localhost/v1/infer
+      │
+Ingress (nginx)
+      │
+Service: envoy (ClusterIP)
+      │
+Envoy (gRPC JSON → gRPC ブリッジ)
+      │
+Service: grpc-server (ClusterIP)
+      │
+gRPC Server (Python)
+

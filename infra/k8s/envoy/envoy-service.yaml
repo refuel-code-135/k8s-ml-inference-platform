@@ -3,11 +3,10 @@ kind: Service
 metadata:
   name: envoy
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
     app: envoy
   ports:
     - port: 8080
       targetPort: 8080
-      nodePort: 30080
 
