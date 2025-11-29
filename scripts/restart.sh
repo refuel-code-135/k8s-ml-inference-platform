@@ -28,7 +28,7 @@ kind load docker-image grpc-server:latest --name "${CLUSTER_NAME}"
 echo "=== Recreating Envoy descriptor secret ==="
 kubectl delete secret envoy-descriptor -n default --ignore-not-found
 kubectl create secret generic envoy-descriptor \
-  --from-file=deployments/envoy/config/inference_descriptor.pb \
+  --from-file=config/envoy/inference_descriptor.pb \
   -n default
 
 echo "=== Applying manifests ==="
