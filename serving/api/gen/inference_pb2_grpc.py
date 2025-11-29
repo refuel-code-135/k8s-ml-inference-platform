@@ -5,10 +5,7 @@ import grpc
 from . import inference_pb2 as inference__pb2
 
 
-
 class InferenceServiceStub(object):
-    """推論サービス
-    """
 
     def __init__(self, channel):
         """Constructor.
@@ -17,54 +14,64 @@ class InferenceServiceStub(object):
             channel: A grpc.Channel.
         """
         self.Infer = channel.unary_unary(
-                '/inference.v1.InferenceService/Infer',
-                request_serializer=inference__pb2.InferRequest.SerializeToString,
-                response_deserializer=inference__pb2.InferResponse.FromString,
-                )
+            "/inference.v1.InferenceService/Infer",
+            request_serializer=inference__pb2.InferRequest.SerializeToString,
+            response_deserializer=inference__pb2.InferResponse.FromString,
+        )
 
 
 class InferenceServiceServicer(object):
-    """推論サービス
-    """
 
     def Infer(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
 
 def add_InferenceServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'Infer': grpc.unary_unary_rpc_method_handler(
-                    servicer.Infer,
-                    request_deserializer=inference__pb2.InferRequest.FromString,
-                    response_serializer=inference__pb2.InferResponse.SerializeToString,
-            ),
+        "Infer": grpc.unary_unary_rpc_method_handler(
+            servicer.Infer,
+            request_deserializer=inference__pb2.InferRequest.FromString,
+            response_serializer=inference__pb2.InferResponse.SerializeToString,
+        ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'inference.v1.InferenceService', rpc_method_handlers)
+        "inference.v1.InferenceService", rpc_method_handlers
+    )
     server.add_generic_rpc_handlers((generic_handler,))
 
 
- # This class is part of an EXPERIMENTAL API.
+# This class is part of an EXPERIMENTAL API.
 class InferenceService(object):
-    """推論サービス
-    """
+    """推論サービス"""
 
     @staticmethod
-    def Infer(request,
+    def Infer(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/inference.v1.InferenceService/Infer',
+            "/inference.v1.InferenceService/Infer",
             inference__pb2.InferRequest.SerializeToString,
             inference__pb2.InferResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )

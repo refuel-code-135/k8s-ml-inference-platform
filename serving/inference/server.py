@@ -28,8 +28,10 @@ def serve():
     health_pb2_grpc.add_HealthServicer_to_server(health_servicer, server)
 
     # Mark services as SERVING
-    health_servicer.set('', health_pb2.HealthCheckResponse.SERVING)
-    health_servicer.set('inference.v1.InferenceService', health_pb2.HealthCheckResponse.SERVING)
+    health_servicer.set("", health_pb2.HealthCheckResponse.SERVING)
+    health_servicer.set(
+        "inference.v1.InferenceService", health_pb2.HealthCheckResponse.SERVING
+    )
 
     server.add_insecure_port("[::]:50051")
     server.start()
@@ -43,4 +45,3 @@ def serve():
 
 if __name__ == "__main__":
     serve()
-
