@@ -10,7 +10,7 @@ nodes:
       - containerPort: 443
         hostPort: 443
         protocol: TCP
-      - containerPort: 30090    # ← Prometheus NodePort
+      - containerPort: 30090
         hostPort: 30090
   - role: worker
   - role: worker
