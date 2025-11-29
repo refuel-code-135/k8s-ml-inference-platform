@@ -35,6 +35,8 @@ echo "=== Applying manifests ==="
 kubectl apply -f infra/k8s/grpc-server/
 kubectl apply -f infra/k8s/envoy/
 kubectl apply -f infra/k8s/ingress/
+kubectl apply -f observability/prometheus/
+
 
 echo "=== Restarting deployments (idempotent) ==="
 for d in $(kubectl get deploy -n default -o name); do
