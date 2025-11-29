@@ -10,6 +10,15 @@ kind delete cluster --name "${CLUSTER_NAME}" || true
 echo "=== Creating Kind cluster ==="
 kind create cluster --name "${CLUSTER_NAME}" --config "${KIND_CONFIG}"
 
+echo "=== Installing Ingress-NGINX Controller ==="
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
+
+echo "=== Waiting for ingress controller to be ready ==="
+kubectl wait --namespace ingress-nginx \
+  --for=condition=Ready pod \
+  --selector=app.kubernetes.io/component=controller \
+  --timeout=180s
+
 echo "=== Building gRPC server Docker image ==="
 docker build -t grpc-server:latest -f infra/docker/grpc-server/Dockerfile .
 
@@ -22,15 +31,17 @@ kubectl create secret generic envoy-descriptor \
   --from-file=infra/envoy/inference_descriptor.pb \
   -n default
 
-echo "=== Applying Kubernetes manifests ==="
+echo "=== Applying manifests ==="
 kubectl apply -f infra/k8s/grpc-server/
 kubectl apply -f infra/k8s/envoy/
+kubectl apply -f infra/k8s/ingress/
 
 echo "=== Restarting deployments (idempotent) ==="
 for d in $(kubectl get deploy -n default -o name); do
   kubectl rollout restart -n default "$d"
 done
 
+echo "=== Running cluster check ==="
 sh check.sh
 
 echo "=== Done! The cluster has been rebuilt cleanly ==="
