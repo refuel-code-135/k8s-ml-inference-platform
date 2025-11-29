@@ -17,6 +17,7 @@ spec:
       containers:
         - name: envoy
           image: envoyproxy/envoy:v1.30-latest
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
           volumeMounts:
@@ -33,7 +34,6 @@ spec:
           configMap:
             name: envoy-config
 
-        # ★ 修正：ConfigMap -> Secret
         - name: descriptor
           secret:
             secretName: envoy-descriptor

@@ -19,24 +19,23 @@ kubectl wait --namespace ingress-nginx \
   --selector=app.kubernetes.io/component=controller \
   --timeout=180s
 
-echo "=== Building gRPC server Docker image ==="
-docker build -t grpc-server:latest -f infra/docker/grpc-server/Dockerfile .
+echo "=== Building Docker images (only gRPC server) ==="
+docker build -t grpc-server:latest -f docker/grpc-server.Dockerfile .
 
-echo "=== Loading Docker image into Kind nodes ==="
+echo "=== Loading gRPC server image into Kind nodes ==="
 kind load docker-image grpc-server:latest --name "${CLUSTER_NAME}"
 
 echo "=== Recreating Envoy descriptor secret ==="
 kubectl delete secret envoy-descriptor -n default --ignore-not-found
 kubectl create secret generic envoy-descriptor \
-  --from-file=infra/envoy/inference_descriptor.pb \
+  --from-file=deployments/envoy/config/inference_descriptor.pb \
   -n default
 
 echo "=== Applying manifests ==="
-kubectl apply -f infra/k8s/grpc-server/
-kubectl apply -f infra/k8s/envoy/
-kubectl apply -f infra/k8s/ingress/
+kubectl apply -f deployments/grpc-server/
+kubectl apply -f deployments/envoy/
+kubectl apply -f deployments/ingress/
 kubectl apply -f observability/prometheus/
-
 
 echo "=== Restarting deployments (idempotent) ==="
 for d in $(kubectl get deploy -n default -o name); do
@@ -44,7 +43,7 @@ for d in $(kubectl get deploy -n default -o name); do
 done
 
 echo "=== Running cluster check ==="
-sh check.sh
+sh scripts/check.sh
 
 echo "=== Done! The cluster has been rebuilt cleanly ==="
 
