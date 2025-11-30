@@ -44,6 +44,52 @@ sh scripts/restart.sh
 
 ## Monitoring
 
-Prometheus
+### Grafana
 
 http://localhost:30090/
+
+### Prometheus
+
+```mermaid
+sequenceDiagram
+    autonumber
+
+    participant Browser as Browser
+    participant Grafana as Grafana
+    participant Prometheus as Prometheus
+    participant Target as Metrics Target
+
+    Browser ->> Grafana: open dashboard
+    Grafana ->> Prometheus: query metrics
+    Prometheus ->> Target: scrape request
+    Target -->> Prometheus: metrics data
+    Prometheus -->> Grafana: query response
+    Grafana -->> Browser: render dashboard
+```
+
+### Loki
+
+```mermaid
+
+sequenceDiagram
+    autonumber
+
+    participant Browser as Browser
+    participant Grafana as Grafana
+    participant MLAPI as ML API Pod
+    participant ContainersLog as containers log
+    participant LokiAgent as Loki Agent DaemonSet
+    participant LokiStorage as Loki Storage
+
+    MLAPI ->> MLAPI: write logs to stdout
+    MLAPI ->> ContainersLog: logs written by node runtime
+
+    LokiAgent ->> ContainersLog: retrieve log file data
+    ContainersLog -->> LokiAgent: return log content
+
+    LokiAgent ->> LokiStorage: push logs
+    Browser ->> Grafana: open dashboard
+    Grafana ->> LokiStorage: log query
+    LokiStorage -->> Grafana: query response
+    Grafana -->> Browser: render dashboard
+```
