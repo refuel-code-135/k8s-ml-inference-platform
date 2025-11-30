@@ -93,3 +93,39 @@ sequenceDiagram
     LokiStorage -->> Grafana: query response
     Grafana -->> Browser: render dashboard
 ```
+
+
+### OpenTelemetry (OTEL)
+
+```mermaid
+
+sequenceDiagram
+    autonumber
+
+    participant Browser as Browser
+    participant Grafana as Grafana
+    participant MLAPI as ML API Pod
+    participant OTELSDK as OTEL SDK
+    participant Collector as OTEL Collector
+    participant Tempo as Tempo Storage (Traces)
+
+    MLAPI ->> OTELSDK: generate trace spans
+    OTELSDK ->> Collector: push trace data (OTLP)
+
+    Collector ->> Tempo: forward trace data (OTLP)
+    Tempo -->> Collector: ack
+
+    Browser ->> Grafana: open dashboard
+    Grafana ->> Tempo: trace query
+    Tempo -->> Grafana: query response
+    Grafana -->> Browser: render trace view
+
+```
+
+### MinIO
+
+http://localhost:9001/browser/tempo-traces
+
+```
+kubectl port-forward deployment/minio 9001:9001
+```

@@ -33,10 +33,18 @@ kubectl create secret generic envoy-descriptor \
   -n default
 
 echo "=== Applying manifests ==="
+kubectl apply -f storage/minio/minio-persistent-volume-claim.yaml
+kubectl apply -f storage/minio/minio-deployment.yaml
+kubectl apply -f storage/minio/minio-service.yaml
+
 kubectl apply -f deployments/grpc-server/
 kubectl apply -f deployments/envoy/
 kubectl apply -f deployments/ingress/
 kubectl apply -f observability/prometheus/
+kubectl apply -f observability/tempo/
+kubectl apply -f observability/otel/
+
+
 
 echo "=== Restarting deployments (idempotent) ==="
 for d in $(kubectl get deploy -n default -o name); do
