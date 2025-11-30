@@ -22,7 +22,6 @@ kubectl wait --namespace ingress-nginx \
 echo "=== Building Docker images (only gRPC server) ==="
 docker build --no-cache -t grpc-server:latest -f docker/grpc-server.Dockerfile .
 
-
 echo "=== Loading gRPC server image into Kind nodes ==="
 kind load docker-image grpc-server:latest --name "${CLUSTER_NAME}"
 
@@ -32,21 +31,34 @@ kubectl create secret generic envoy-descriptor \
   --from-file=config/envoy/inference_descriptor.pb \
   -n default
 
-echo "=== Applying manifests ==="
+echo "=== Applying MinIO manifests ==="
 kubectl apply -f storage/minio/minio-persistent-volume-claim.yaml
 kubectl apply -f storage/minio/minio-deployment.yaml
 kubectl apply -f storage/minio/minio-service.yaml
 
+echo "=== Waiting for MinIO to be ready ==="
+kubectl wait --for=condition=Ready pod \
+  -l app=minio \
+  --timeout=120s
+
+echo "=== Creating MinIO bucket: tempo-traces ==="
+kubectl exec deployment/minio -- sh -c "
+  mc alias set local http://localhost:9000 minio minio123 >/dev/null 2>&1
+  mc mb -p local/tempo-traces >/dev/null 2>&1 || true
+"
+
+echo "=== Applying application manifests ==="
 kubectl apply -f deployments/grpc-server/
 kubectl apply -f deployments/envoy/
 kubectl apply -f deployments/ingress/
+
+echo "=== Applying observability manifests ==="
 kubectl apply -f observability/prometheus/
 kubectl apply -f observability/tempo/
 kubectl apply -f observability/otel/
+kubectl apply -f observability/grafana/
 
-
-
-echo "=== Restarting deployments (idempotent) ==="
+echo "=== Restarting all deployments (idempotent) ==="
 for d in $(kubectl get deploy -n default -o name); do
   kubectl rollout restart -n default "$d"
 done

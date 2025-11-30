@@ -8,10 +8,11 @@ data:
       otlp:
         protocols:
           grpc: {}
+          http: {}
 
     exporters:
-      otlp:
-        endpoint: tempo:4317
+      otlphttp:
+        endpoint: http://tempo:4318
         tls:
           insecure: true
 
@@ -19,4 +20,5 @@ data:
       pipelines:
         traces:
           receivers: [otlp]
-          exporters: [otlp]
+          exporters: [otlphttp]
+

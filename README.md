@@ -46,9 +46,11 @@ sh scripts/restart.sh
 
 ### Grafana
 
-http://localhost:30090/
+http://localhost:30091/
 
 ### Prometheus
+
+http://localhost:30090/
 
 ```mermaid
 sequenceDiagram
