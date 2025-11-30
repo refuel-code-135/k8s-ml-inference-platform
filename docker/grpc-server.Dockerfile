@@ -16,9 +16,7 @@ RUN apt-get update && apt-get install -y curl \
     && chmod +x /usr/local/bin/grpc_health_probe \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-
-
 EXPOSE 50051
 
-CMD ["python", "serving/inference/server.py"]
+CMD ["python", "serving/service/server.py"]
 
