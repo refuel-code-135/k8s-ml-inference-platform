@@ -20,6 +20,7 @@ sequenceDiagram
     Envoy->>GrpcSvc: gRPC request
     GrpcSvc->>Grpc: Forward to server pod
     Grpc-->>Envoy: gRPC response
+    Envoy->>Envoy: gRPC --> JSON transcoding
     Envoy-->>Client: JSON response
 ```
 
