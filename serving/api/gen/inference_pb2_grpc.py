@@ -45,7 +45,6 @@ def add_InferenceServiceServicer_to_server(servicer, server):
 
 # This class is part of an EXPERIMENTAL API.
 class InferenceService(object):
-    """推論サービス"""
 
     @staticmethod
     def Infer(

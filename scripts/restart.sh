@@ -4,6 +4,8 @@ set -e
 CLUSTER_NAME="ml-serving"
 KIND_CONFIG="dev/kind/cluster.yaml"
 
+colima start --arch aarch64
+
 echo "=== Deleting existing Kind cluster (if any) ==="
 kind delete cluster --name "${CLUSTER_NAME}" || true
 
@@ -19,7 +21,7 @@ kubectl wait --namespace ingress-nginx \
   --selector=app.kubernetes.io/component=controller \
   --timeout=180s
 
-echo "=== Building Docker images (only gRPC server) ==="
+echo "=== Building Docker images ==="
 docker build --no-cache -t grpc-server:latest -f docker/grpc-server.Dockerfile .
 
 echo "=== Loading gRPC server image into Kind nodes ==="
@@ -48,17 +50,9 @@ kubectl exec deployment/minio -- sh -c "
 "
 
 echo "=== Applying application manifests ==="
-kubectl apply -f deployments/grpc-server/
-kubectl apply -f deployments/envoy/
-kubectl apply -f deployments/ingress/
+kubectl apply -R -f manifests/
 
-echo "=== Applying observability manifests ==="
-kubectl apply -f observability/prometheus/
-kubectl apply -f observability/tempo/
-kubectl apply -f observability/otel/
-kubectl apply -f observability/grafana/
-
-echo "=== Restarting all deployments (idempotent) ==="
+echo "=== Restarting all manifests ==="
 for d in $(kubectl get deploy -n default -o name); do
   kubectl rollout restart -n default "$d"
 done

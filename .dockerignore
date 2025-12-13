@@ -1,0 +1,6 @@
+# Ignore everything by default
+*
+
+# Allow only files required for production build
+!requirements/prod.txt
+!serving/
