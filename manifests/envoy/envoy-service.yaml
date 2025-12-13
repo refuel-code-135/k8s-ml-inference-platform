@@ -14,4 +14,3 @@ spec:
     - name: admin
       port: 9901
       targetPort: 9901
-

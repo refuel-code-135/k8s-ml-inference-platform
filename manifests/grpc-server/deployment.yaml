@@ -21,17 +21,17 @@ spec:
           ports:
             - containerPort: 50051
 
-#          livenessProbe:
-#            exec:
-#              command: ["/usr/local/bin/grpc_health_probe", "-addr=:50051"]
-#            initialDelaySeconds: 5
-#            periodSeconds: 10
-#
-#          readinessProbe:
-#            exec:
-#              command: ["/usr/local/bin/grpc_health_probe", "-addr=:50051"]
-#            initialDelaySeconds: 2
-#            periodSeconds: 5
+          #          livenessProbe:
+          #            exec:
+          #              command: ["/usr/local/bin/grpc_health_probe", "-addr=:50051"]
+          #            initialDelaySeconds: 5
+          #            periodSeconds: 10
+          #
+          #          readinessProbe:
+          #            exec:
+          #              command: ["/usr/local/bin/grpc_health_probe", "-addr=:50051"]
+          #            initialDelaySeconds: 2
+          #            periodSeconds: 5
 
           resources:
             requests:
@@ -40,4 +40,3 @@ spec:
             limits:
               cpu: "300m"
               memory: "256Mi"
-

@@ -37,4 +37,3 @@ spec:
         - name: descriptor
           secret:
             secretName: envoy-descriptor
-

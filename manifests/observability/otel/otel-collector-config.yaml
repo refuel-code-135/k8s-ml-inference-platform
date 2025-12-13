@@ -21,4 +21,3 @@ data:
         traces:
           receivers: [otlp]
           exporters: [otlphttp]
-

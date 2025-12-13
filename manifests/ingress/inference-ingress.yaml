@@ -15,4 +15,3 @@ spec:
                 name: envoy
                 port:
                   number: 8080
-

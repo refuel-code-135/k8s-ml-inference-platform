@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mlflow-tracking-server
+  labels:
+    app: mlflow
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mlflow
+  template:
+    metadata:
+      labels:
+        app: mlflow
+    spec:
+      containers:
+        - name: mlflow-server
+          # MLflowを含む公式またはカスタムイメージを使用
+          # カスタムイメージを作成し、必要な依存関係（s3fsなど）を含めることが推奨されます。
+          image: python:3.11-slim
+          ports:
+            - containerPort: 5000
+          env:
+            # --- 1. データベース接続設定 (Metadata Store) ---
+            # MLflowがメタデータを保存するデータベースURI
+            # サービス名は db-service (ClusterIP Service名) に合わせてください
+            - name: MLFLOW_TRACKING_URI
+              value: "postgresql://mlflow_user:mlflow_password@db-service:5432/mlflow_db"
+
+              # --- 2. アーティファクトストア接続設定 (MinIO/S3) ---
+              # MinIOのエンドポイントURLを設定
+            - name: MLFLOW_S3_ENDPOINT_URL
+              value: "http://minio-service:9000"
+              # S3互換のMinIOを使用するため、AWS認証情報を設定
+              # ここでは、Kubernetes Secretから認証情報を安全に取得します。
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: mlflow-minio-secret
+                  key: accesskey
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: mlflow-minio-secret
+                  key: secretkey
+
+          # --- 3. MLflow サーバー起動コマンド ---
+          command: ["mlflow"]
+          args:
+            - "server"
+            - "--backend-store-uri"
+            - "$(MLFLOW_TRACKING_URI)"
+            - "--artifacts-destination"
+            - "s3://mlflow-artifacts" # MinIOバケット名
+            - "--host"
+            - "0.0.0.0"
+            - "--port"
+            - "5000"

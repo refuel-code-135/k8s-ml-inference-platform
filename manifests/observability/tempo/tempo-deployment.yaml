@@ -28,4 +28,3 @@ spec:
         - name: tempo-config
           configMap:
             name: tempo-config
-

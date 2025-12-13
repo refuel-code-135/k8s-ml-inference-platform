@@ -11,4 +11,3 @@ spec:
       nodePort: 30090
   selector:
     app: prometheus
-
