@@ -91,6 +91,32 @@ sequenceDiagram
 
 ### Loki
 
+#### Loki: Data Collection Phase
+
+```mermaid
+sequenceDiagram
+    autonumber
+
+    participant App as Application Pod
+    participant Runtime as Container Runtime (log files)
+    participant Agent as Loki Agent (DaemonSet)
+    participant Loki as Loki (Ingest)
+    participant Storage as Loki Storage (MinIO)
+
+    App ->> App: write logs to stdout/stderr
+    App ->> Runtime: logs written by container runtime
+
+    Agent ->> Runtime: read log files
+    Runtime -->> Agent: log entries
+
+    Agent ->> Loki: push log streams
+    Loki ->> Storage: store log chunks
+
+```
+
+#### Loki: Data Visualization Phase
+
+
 ```mermaid
 
 sequenceDiagram
@@ -98,22 +124,16 @@ sequenceDiagram
 
     participant Browser as Browser
     participant Grafana as Grafana
-    participant MLAPI as ML API Pod
-    participant ContainersLog as containers log
-    participant LokiAgent as Loki Agent DaemonSet
-    participant LokiStorage as Loki Storage
+    participant Loki as Loki (Query)
+    participant Storage as Loki Storage (MinIO)
 
-    MLAPI ->> MLAPI: write logs to stdout
-    MLAPI ->> ContainersLog: logs written by node runtime
-
-    LokiAgent ->> ContainersLog: retrieve log file data
-    ContainersLog -->> LokiAgent: return log content
-
-    LokiAgent ->> LokiStorage: push logs
     Browser ->> Grafana: open dashboard
-    Grafana ->> LokiStorage: log query
-    LokiStorage -->> Grafana: query response
-    Grafana -->> Browser: render dashboard
+    Grafana ->> Loki: log query (LogQL)
+    Loki ->> Storage: read log chunks
+    Storage -->> Loki: log data
+    Loki -->> Grafana: query response
+    Grafana -->> Browser: render logs
+
 ```
 
 
