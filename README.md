@@ -53,21 +53,40 @@ http://localhost:30091/
 
 http://localhost:30090/
 
+#### Prometheus: Data Collection Phase
+
+```mermaid
+sequenceDiagram
+    autonumber
+
+    participant Prom as Prometheus
+    participant TSDB as Prometheus (internal TSDB)
+    participant Target as Metrics Target
+
+    Prom ->> Target: GET /metrics (scrape)
+    Target -->> Prom: metrics data
+    Prom ->> TSDB: append metrics data
+
+```
+
+#### Prometheus: Data Visualization Phase
+
 ```mermaid
 sequenceDiagram
     autonumber
 
     participant Browser as Browser
     participant Grafana as Grafana
-    participant Prometheus as Prometheus
-    participant Target as Metrics Target
+    participant Prom as Prometheus
+    participant TSDB as Prometheus (internal TSDB)
 
     Browser ->> Grafana: open dashboard
-    Grafana ->> Prometheus: query metrics
-    Prometheus ->> Target: scrape request
-    Target -->> Prometheus: metrics data
-    Prometheus -->> Grafana: query response
+    Grafana ->> Prom: query metrics (PromQL)
+    Prom ->> TSDB: read metrics data
+    TSDB -->> Prom: query result
+    Prom -->> Grafana: query response
     Grafana -->> Browser: render dashboard
+
 ```
 
 ### Loki
