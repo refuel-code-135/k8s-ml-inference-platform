@@ -139,30 +139,42 @@ sequenceDiagram
 
 ### OpenTelemetry (OTEL)
 
+#### OTEL: Data Collection Phase
+
+
 ```mermaid
 
 sequenceDiagram
     autonumber
 
-    participant Browser as Browser
-    participant Grafana as Grafana
-    participant MLAPI as ML API Pod
-    participant OTELSDK as OTEL SDK
-    participant Collector as OTEL Collector
-    participant Tempo as Tempo Storage (Traces)
+    participant App as Application Pod
+    participant Collector as OpenTelemetry Collector (k8s DaemonSet)
+    participant Tempo as Tempo Storage (MinIO)
 
-    MLAPI ->> OTELSDK: generate trace spans
-    OTELSDK ->> Collector: push trace data (OTLP)
-
-    Collector ->> Tempo: forward trace data (OTLP)
-    Tempo -->> Collector: ack
-
-    Browser ->> Grafana: open dashboard
-    Grafana ->> Tempo: trace query
-    Tempo -->> Grafana: query response
-    Grafana -->> Browser: render trace view
+    App ->> App: start spans using OpenTelemetry SDK
+    App ->> Collector: export trace data using OpenTelemetry SDK over OpenTelemetry Protocol (OTLP)
+    Collector ->> Tempo: store trace data
 
 ```
+
+#### OTEL: Data Visualization Phase
+
+
+```mermaid
+
+sequenceDiagram
+    participant Browser
+    participant Grafana
+    participant Tempo as Tempo Storage (MinIO)
+
+    Browser ->> Grafana: open dashboard
+    Grafana ->> Tempo: query traces (TraceQL)
+    Tempo -->> Grafana: trace query result
+    Grafana -->> Browser: render trace view
+
+
+```
+
 
 ### MinIO
 
