@@ -7,21 +7,23 @@ sequenceDiagram
     autonumber
 
     participant Client as REST Client (curl)
-    participant Ingress as ingress-nginx
-    participant EnvoySvc as Service: envoy
-    participant Envoy as Envoy Proxy
-    participant GrpcSvc as Service: gRPC-server
-    participant Grpc as Python gRPC-server
+    participant Ingress as NGINX Ingress Controller (Pod)
+    participant EnvoySvc as Envoy (k8s Service) 
+    participant Envoy as Envoy L7 proxy (Pod)
+    participant GrpcSvc as gRPC-server (k8s Service) 
+    participant Grpc as Python gRPC-server (Pod)
 
     Client->>Ingress: HTTP POST /v1/infer (JSON)
     Ingress->>EnvoySvc: HTTP request
     EnvoySvc->>Envoy: Forward to Envoy Pod
-    Envoy->>Envoy: JSON --> gRPC transcoding
+    Envoy->>Envoy: JSON -> gRPC transcoding
     Envoy->>GrpcSvc: gRPC request
     GrpcSvc->>Grpc: Forward to server pod
     Grpc-->>Envoy: gRPC response
-    Envoy->>Envoy: gRPC --> JSON transcoding
-    Envoy-->>Client: JSON response
+    Envoy->>Envoy: gRPC -> JSON transcoding
+    Envoy-->>Ingress: JSON response
+    Ingress-->>Client: HTTP response (JSON)
+
 ```
 
 ## Requirements
