@@ -27,7 +27,6 @@ spec:
             # サービス名は db-service (ClusterIP Service名) に合わせてください
             - name: MLFLOW_TRACKING_URI
               value: "postgresql://mlflow_user:mlflow_password@db-service:5432/mlflow_db"
-
               # --- 2. アーティファクトストア接続設定 (MinIO/S3) ---
               # MinIOのエンドポイントURLを設定
             - name: MLFLOW_S3_ENDPOINT_URL
@@ -44,7 +43,6 @@ spec:
                 secretKeyRef:
                   name: mlflow-minio-secret
                   key: secretkey
-
           # --- 3. MLflow サーバー起動コマンド ---
           command: ["mlflow"]
           args:

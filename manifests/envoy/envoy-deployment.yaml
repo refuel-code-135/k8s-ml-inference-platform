@@ -24,16 +24,13 @@ spec:
             - name: envoy-config
               mountPath: /etc/envoy/envoy.yaml
               subPath: envoy.yaml
-
             - name: descriptor
               mountPath: /etc/envoy/inference_descriptor.pb
               subPath: inference_descriptor.pb
-
       volumes:
         - name: envoy-config
           configMap:
             name: envoy-config
-
         - name: descriptor
           secret:
             secretName: envoy-descriptor
