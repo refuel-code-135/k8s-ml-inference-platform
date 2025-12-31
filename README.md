@@ -7,21 +7,27 @@ sequenceDiagram
     autonumber
 
     participant Client as REST Client (curl)
-    participant Ingress as ingress-nginx
-    participant EnvoySvc as Service: envoy
-    participant Envoy as Envoy Proxy
-    participant GrpcSvc as Service: gRPC-server
-    participant Grpc as Python gRPC-server
+    participant IngressSvc as NGINX Ingress Controller (k8s Service)
+    participant IngressPod as NGINX Ingress Controller (Pod)
+    participant EnvoySvc as Envoy (k8s Service) 
+    participant Envoy as Envoy L7 proxy (Pod)
+    participant GrpcSvc as gRPC-server (k8s Service) 
+    participant Grpc as Python gRPC-server (Pod)
 
-    Client->>Ingress: HTTP POST /v1/infer (JSON)
-    Ingress->>EnvoySvc: HTTP request
+    Client->>IngressSvc: HTTP POST /v1/infer (JSON)
+    IngressSvc->>IngressPod: Forward to Ingress Pod
+    IngressPod->>EnvoySvc: HTTP request
     EnvoySvc->>Envoy: Forward to Envoy Pod
-    Envoy->>Envoy: JSON --> gRPC transcoding
+    Envoy->>Envoy: JSON -> gRPC transcoding
     Envoy->>GrpcSvc: gRPC request
     GrpcSvc->>Grpc: Forward to server pod
     Grpc-->>Envoy: gRPC response
-    Envoy->>Envoy: gRPC --> JSON transcoding
-    Envoy-->>Client: JSON response
+    Envoy->>Envoy: gRPC -> JSON transcoding
+    Envoy-->>IngressPod: JSON response
+    IngressPod-->>IngressSvc: HTTP response (JSON)
+    IngressSvc-->>Client: HTTP response (JSON)
+
+
 ```
 
 ## Requirements
@@ -53,25 +59,70 @@ http://localhost:30091/
 
 http://localhost:30090/
 
+#### Prometheus: Data Collection Phase
+
+```mermaid
+sequenceDiagram
+    autonumber
+
+    participant Prom as Prometheus
+    participant TSDB as Prometheus (internal TSDB)
+    participant Target as Metrics Target
+
+    Prom ->> Target: GET /metrics (scrape)
+    Target -->> Prom: metrics data
+    Prom ->> TSDB: append metrics data
+
+```
+
+#### Prometheus: Data Visualization Phase
+
 ```mermaid
 sequenceDiagram
     autonumber
 
     participant Browser as Browser
     participant Grafana as Grafana
-    participant Prometheus as Prometheus
-    participant Target as Metrics Target
+    participant Prom as Prometheus
+    participant TSDB as Prometheus (internal TSDB)
 
     Browser ->> Grafana: open dashboard
-    Grafana ->> Prometheus: query metrics
-    Prometheus ->> Target: scrape request
-    Target -->> Prometheus: metrics data
-    Prometheus -->> Grafana: query response
+    Grafana ->> Prom: query metrics (PromQL)
+    Prom ->> TSDB: read metrics data
+    TSDB -->> Prom: query result
+    Prom -->> Grafana: query response
     Grafana -->> Browser: render dashboard
+
 ```
 
 ### Loki
 
+#### Loki: Data Collection Phase
+
+```mermaid
+sequenceDiagram
+    autonumber
+
+    participant App as Application Pod
+    participant Runtime as Container Runtime (log files)
+    participant Agent as Loki Agent (DaemonSet)
+    participant Loki as Loki (Ingest)
+    participant Storage as Loki Storage (MinIO)
+
+    App ->> App: write logs to stdout/stderr
+    App ->> Runtime: logs written by container runtime
+
+    Agent ->> Runtime: read log files
+    Runtime -->> Agent: log entries
+
+    Agent ->> Loki: push log streams
+    Loki ->> Storage: store log chunks
+
+```
+
+#### Loki: Data Visualization Phase
+
+
 ```mermaid
 
 sequenceDiagram
@@ -79,51 +130,57 @@ sequenceDiagram
 
     participant Browser as Browser
     participant Grafana as Grafana
-    participant MLAPI as ML API Pod
-    participant ContainersLog as containers log
-    participant LokiAgent as Loki Agent DaemonSet
-    participant LokiStorage as Loki Storage
+    participant Loki as Loki (Query)
+    participant Storage as Loki Storage (MinIO)
 
-    MLAPI ->> MLAPI: write logs to stdout
-    MLAPI ->> ContainersLog: logs written by node runtime
-
-    LokiAgent ->> ContainersLog: retrieve log file data
-    ContainersLog -->> LokiAgent: return log content
-
-    LokiAgent ->> LokiStorage: push logs
     Browser ->> Grafana: open dashboard
-    Grafana ->> LokiStorage: log query
-    LokiStorage -->> Grafana: query response
-    Grafana -->> Browser: render dashboard
+    Grafana ->> Loki: log query (LogQL)
+    Loki ->> Storage: read log chunks
+    Storage -->> Loki: log data
+    Loki -->> Grafana: query response
+    Grafana -->> Browser: render logs
+
 ```
 
 
 ### OpenTelemetry (OTEL)
 
+#### OTEL: Data Collection Phase
+
+
 ```mermaid
 
 sequenceDiagram
     autonumber
 
-    participant Browser as Browser
-    participant Grafana as Grafana
-    participant MLAPI as ML API Pod
-    participant OTELSDK as OTEL SDK
-    participant Collector as OTEL Collector
-    participant Tempo as Tempo Storage (Traces)
+    participant App as Application Pod
+    participant Collector as OpenTelemetry Collector (k8s DaemonSet)
+    participant Tempo as Tempo Storage (MinIO)
 
-    MLAPI ->> OTELSDK: generate trace spans
-    OTELSDK ->> Collector: push trace data (OTLP)
-
-    Collector ->> Tempo: forward trace data (OTLP)
-    Tempo -->> Collector: ack
-
-    Browser ->> Grafana: open dashboard
-    Grafana ->> Tempo: trace query
-    Tempo -->> Grafana: query response
-    Grafana -->> Browser: render trace view
+    App ->> App: start spans using OpenTelemetry SDK
+    App ->> Collector: export trace data using OpenTelemetry SDK over OpenTelemetry Protocol (OTLP)
+    Collector ->> Tempo: store trace data
 
 ```
+
+#### OTEL: Data Visualization Phase
+
+
+```mermaid
+
+sequenceDiagram
+    participant Browser
+    participant Grafana
+    participant Tempo as Tempo Storage (MinIO)
+
+    Browser ->> Grafana: open dashboard
+    Grafana ->> Tempo: query traces (TraceQL)
+    Tempo -->> Grafana: trace query result
+    Grafana -->> Browser: render trace view
+
+
+```
+
 
 ### MinIO
 
