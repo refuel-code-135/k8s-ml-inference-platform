@@ -21,8 +21,8 @@ jobs:
             -v "${PWD}:/work" \
             -w /work \
             ghcr.io/google/yamlfmt:0.20 \
-            yamlfmt -conf .config/yamlfmt/config.yml .
-
+            yamlfmt -conf .config/yamlfmt/config.yml \
+            manifests storage dev
       - name: Create PR if changed
         uses: peter-evans/create-pull-request@v6
         with:
