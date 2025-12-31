@@ -15,14 +15,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup yamlfmt
-        uses: google/yamlfmt@v0.13.0
-
-      - name: Run yamlfmt
+      - name: Run yamlfmt (docker)
         run: |
-          yamlfmt \
-            -conf .config/yamlfmt/config.yml \
-            .
+          docker run --rm \
+            -v "${PWD}:/work" \
+            -w /work \
+            ghcr.io/google/yamlfmt:0.20 \
+            yamlfmt -conf .config/yamlfmt/config.yml .
 
       - name: Create PR if changed
         uses: peter-evans/create-pull-request@v6
@@ -30,5 +29,4 @@ jobs:
           branch: auto/format-yaml
           title: "chore: apply yaml formatting"
           commit-message: "chore: apply yaml formatting"
-
 
