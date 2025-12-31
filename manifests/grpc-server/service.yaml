@@ -3,12 +3,12 @@ kind: Service
 metadata:
   name: grpc-server
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
     app: grpc-server
   ports:
     - name: grpc
       port: 50051
       targetPort: 50051
-      nodePort: 30000
       protocol: TCP
+
