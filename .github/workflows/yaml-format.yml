@@ -1,0 +1,37 @@
+name: auto-format-yaml
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup yamlfmt
+        run: |
+          curl -L https://github.com/google/yamlfmt/releases/latest/download/yamlfmt_linux_amd64.tar.gz \
+            | tar xz
+          sudo mv yamlfmt /usr/local/bin/yamlfmt
+
+      - name: Run yamlfmt
+        run: |
+          yamlfmt \
+            -conf .config/yamlfmt/config.yml \
+            .
+
+      - name: Create PR if changed
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: auto/format-yaml
+          title: "chore: apply yaml formatting"
+          commit-message: "chore: apply yaml formatting"
+
+
